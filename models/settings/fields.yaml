@@ -4,10 +4,17 @@
 
 fields:
   fb_app_id:
-    label: Application ID
-    comment: The Application ID (https://developers.facebook.com/)
+    label: App ID:
+    comment: The App ID (https://developers.facebook.com/)
+    type: text
     span: left
   fb_app_secret:
-    label: Application Secret
-    comment: The Application Secret (https://developers.facebook.com/)
+    label: App Secret:
+    comment: The App Secret (https://developers.facebook.com/)
+    type: text
     span: right
+  fb_page_id:
+    label: App Page ID:
+    comment: The App Page ID (https://developers.facebook.com/)
+    type: text
+    span: left
