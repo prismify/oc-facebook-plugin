@@ -1,0 +1,13 @@
+# ===================================
+#  Form Field Definitions
+# ===================================
+
+fields:
+  fb_app_id:
+    label: Application ID
+    comment: The Application ID (https://developers.facebook.com/)
+    span: left
+  fb_app_secret:
+    label: Application Secret
+    comment: The Application Secret (https://developers.facebook.com/)
+    span: right

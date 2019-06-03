@@ -1,0 +1,21 @@
+{
+    "name": "prismify/facebook",
+    "description": "Facebook integration for October CMS",
+    "homepage": "https://github.com/prismify/oc-facebook-plugin",
+    "keywords": ["laravel", "october", "cms", "facebook", "feed"],
+    "require": {
+        "php": "^5.4|^7.0",
+        "facebook/graph-sdk": "^5.7"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Prismify",
+            "email": "hello@prismify.org"
+        },
+        {
+            "name": "Algoriq",
+            "email": "algoriq@prismify.org"
+        }
+    ]
+}
