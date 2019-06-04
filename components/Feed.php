@@ -2,9 +2,6 @@
 
 use Cms\Classes\ComponentBase;
 use Prismify\Facebook\Models\Settings;
-use Facebook\Facebook;
-use Facebook\Exceptions\FacebookResponseException;
-use Facebook\Exceptions\FacebookSDKException;
 
 class Feed extends ComponentBase
 {
@@ -69,38 +66,31 @@ class Feed extends ComponentBase
 
     public function listPosts()
     {
-        $fb = new Facebook([
+
+        $fb = new \Facebook\Facebook([
             'app_id'        => Settings::get('fb_app_id'),
             'app_secret'    => Settings::get('fb_app_secret'),
             'page_id'       => Settings::get('fb_page_id')
         ]);
 
+        $result = [];
+
         try {
             // Returns a `Facebook\FacebookResponse` object
             $response = $fb->get(
-                '/'.$this->pageId.'/feed?limit=25',
+                '/{page-id}/feed',
                 '{access-token}'
             );
-        } catch(FacebookResponseException $e) {
+
+        } catch(\Facebook\Exceptions\FacebookResponseException $e) {
             return 'Graph returned an error: ' . $e->getMessage();
-        } catch(FacebookSDKException $e) {
+        } catch(\Facebook\Exceptions\FacebookSDKException $e) {
             return 'Facebook SDK returned an error: ' . $e->getMessage();
         }
 
-        $posts = $response->getGraphNode()->asArray()['data'];
+        $graphEdge = $response->getGraphEdge();
 
-        $num = 1;
-
-        foreach ($posts as &$post){
-
-            // load only a limited number of posts (maxItems)
-            if($this->property('postsPerPage') < $num++) break;
-
-            if (isset($post->message))
-                $post->short = substr ($post->message, 0, $this->property('postsMaxDesc')).'...';
-            else
-                $post->short = '';
-
+        foreach ($graphEdge as &$post){
             array_push($result, $post);
         }
 
