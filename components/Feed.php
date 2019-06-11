@@ -2,6 +2,7 @@
 
 use Cms\Classes\ComponentBase;
 use Prismify\Facebook\Models\Settings;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class Feed extends ComponentBase
 {
@@ -10,6 +11,30 @@ class Feed extends ComponentBase
      * @var Collection
      */
     public $posts;
+
+    /**
+     * Facebook app id
+     * @var int
+     */
+    private $app_id;
+
+    /**
+     * Facebook app secret
+     * @var string
+     */
+    private $app_secret;
+
+    /**
+     * Facebook page id
+     * @var int
+     */
+    private $page_id;
+
+    /**
+     * Facebook page access token
+     * @var string
+     */
+    private $access_token;
 
     /**
      * Message to display when there are no messages.
@@ -28,18 +53,18 @@ class Feed extends ComponentBase
     public function defineProperties()
     {
         return [
+          'showPagination' => [
+                 'title'             => 'Show pagintion',
+                 'description'       => 'Leave cheked if u want to show pagination',
+                 'type'              => 'checkbox',
+            ],
             'postsPerPage' => [
                 'title'             => 'Posts per page',
                 'type'              => 'string',
                 'validationPattern' => '^[0-9]+$',
                 'validationMessage' => 'Invalid format of the posts per page value.',
-                'default'           => '3',
-            ],
-            'postsMaxDesc'   => [
-                'title'			    => 'Posts description length',
-                'description'	    => 'This value is used to determine what a maximal length post description.',
-                'default'		    => 100,
-                'type'			    => 'string'
+                'default'           => '6',
+                'depends'  =>    ['showPagination'],
             ],
             'noPostsMessage' => [
                 'title'             => 'No posts message',
@@ -47,15 +72,27 @@ class Feed extends ComponentBase
                 'type'              => 'string',
                 'default'           => 'No posts found',
                 'showExternalParam' => false,
-            ],
+            ]
         ];
+    }
+
+    public function onInit(){
+
     }
 
     public function onRun()
     {
-        $this->prepareVars();
 
+        $this->app_id = $this->page['app_id'] = Settings::get('fb_app_id'); // Set facebook app id
+        $this->app_secret = Settings::get('fb_app_secret'); // Set facebook app secret
+        $this->page_id = Settings::get('fb_page_id'); // Set facebook page id
+        $this->access_token = Settings::get('fb_access_token'); // Set facebook page access token;
+
+        $this->addJs('https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.3&appId='.$this->app_id.'&autoLogAppEvents=1"'); // Inject facebook javascript sdk with our facebook app id
+
+        $this->prepareVars();
         $this->posts = $this->page['posts'] = $this->listPosts();
+
 
     }
 
@@ -68,19 +105,25 @@ class Feed extends ComponentBase
     {
 
         $fb = new \Facebook\Facebook([
-            'app_id'        => Settings::get('fb_app_id'),
-            'app_secret'    => Settings::get('fb_app_secret'),
-            'page_id'       => Settings::get('fb_page_id')
+            'app_id'        => $this->app_id,
+            'app_secret'    => $this->app_secret,
+            'page_id'       => $this->page_id
         ]);
 
+
+
         $result = [];
+
 
         try {
             // Returns a `Facebook\FacebookResponse` object
             $response = $fb->get(
-                '/{page-id}/feed',
-                '{access-token}'
+                '/'.$this->page_id.'/feed?fields=permalink_url',
+                $this->access_token
             );
+
+
+
 
         } catch(\Facebook\Exceptions\FacebookResponseException $e) {
             return 'Graph returned an error: ' . $e->getMessage();
@@ -88,12 +131,33 @@ class Feed extends ComponentBase
             return 'Facebook SDK returned an error: ' . $e->getMessage();
         }
 
-        $graphEdge = $response->getGraphEdge();
+        $graphEdge = $pagesEdge = $response->getGraphEdge();
 
-        foreach ($graphEdge as &$post){
+        if($this->property('showPagination') == 1){
+
+          // Collect and paginate graphedge
+          $items = collect($graphEdge); // Collect posts
+          $currentPage = input('page') ? input('page') : 1; // Current page
+          $perPage = $this->property('postsPerPage'); // Items per page
+
+          $paginate = new LengthAwarePaginator($items->forPage($currentPage, $perPage), $items->count(), $perPage, $currentPage);
+
+          return $paginate;
+
+        }else{
+
+          foreach ($graphEdge as &$post){
             array_push($result, $post);
+          }
+
+          return $result;
+
+
         }
 
-        return $result;
+
+
+
     }
-}
+
+  }

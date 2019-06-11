@@ -1,23 +1,24 @@
 {% set posts = __SELF__.posts %}
 
 <div class="container">
-    <div class="row">
-        {% for post in posts %}
-        {% if post.message %}
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-body">
-                    <p class="card-text">
-                        {{ post.message|length > 50 ? post.message|slice(0, 50) ~ '...' : post.message }}
-                    </p>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        {% else %}
-        <div class="col-12">
-            <p class="text-muted">{{ __SELF__.noPostsMessage }}</p>
-        </div>
-        {% endfor %}
+  <div class="row">
+    {% for post in posts %}
+    <div class="col-lg-4">
+      <div class="fb-post"  data-href="{{ post.permalink_url }}" data-width="500" data-show-text="true"></div>
     </div>
+    {% else %}
+    <div class="col-12">
+      <p class="text-muted">{{ __SELF__.noPostsMessage }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if __SELF__.property('showPagination') == 1 %}
+  <div class="row">
+    <div class="col-lg-12">
+      {{ posts|raw }}
+    </div>
+  </div>
+  {% endif %}
+
 </div>

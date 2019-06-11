@@ -18,3 +18,7 @@ fields:
     comment: The App Page ID (https://developers.facebook.com/)
     type: text
     span: left
+  fb_access_token:
+    label: Page access token:
+    type: text
+    span: right
