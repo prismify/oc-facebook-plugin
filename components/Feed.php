@@ -53,10 +53,10 @@ class Feed extends ComponentBase
     public function defineProperties()
     {
         return [
-          'showPagination' => [
-                 'title'             => 'Show pagintion',
-                 'description'       => 'Leave cheked if u want to show pagination',
-                 'type'              => 'checkbox',
+            'showPagination' => [
+                'title'             => 'Show pagintion',
+                'description'       => 'Leave cheked if u want to show pagination',
+                'type'              => 'checkbox',
             ],
             'postsPerPage' => [
                 'title'             => 'Posts per page',
@@ -88,7 +88,7 @@ class Feed extends ComponentBase
         $this->page_id = Settings::get('fb_page_id'); // Set facebook page id
         $this->access_token = Settings::get('fb_access_token'); // Set facebook page access token;
 
-        $this->addJs('https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.3&appId='.$this->app_id.'&autoLogAppEvents=1"'); // Inject facebook javascript sdk with our facebook app id
+        $this->addJs('https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.3&appId='.$this->app_id.'&autoLogAppEvents=1'); // Inject facebook javascript sdk with our facebook app id
 
         $this->prepareVars();
         $this->posts = $this->page['posts'] = $this->listPosts();
@@ -135,29 +135,25 @@ class Feed extends ComponentBase
 
         if($this->property('showPagination') == 1){
 
-          // Collect and paginate graphedge
-          $items = collect($graphEdge); // Collect posts
-          $currentPage = input('page') ? input('page') : 1; // Current page
-          $perPage = $this->property('postsPerPage'); // Items per page
+            // Collect and paginate graphedge
+            $items = collect($graphEdge); // Collect posts
+            $currentPage = input('page') ? input('page') : 1; // Current page
+            $perPage = $this->property('postsPerPage'); // Items per page
 
-          $paginate = new LengthAwarePaginator($items->forPage($currentPage, $perPage), $items->count(), $perPage, $currentPage);
+            $paginate = new LengthAwarePaginator($items->forPage($currentPage, $perPage), $items->count(), $perPage, $currentPage);
 
-          return $paginate;
+            return $paginate;
 
-        }else{
+        } else {
+            
+            $num = 1;
+            
+            foreach ($graphEdge as &$post) {
+                $perPage = $this->property('postsPerPage'); // Items per page
+                array_push($result, $post);
+            }
 
-          foreach ($graphEdge as &$post){
-            array_push($result, $post);
-          }
-
-          return $result;
-
-
+            return $result;
         }
-
-
-
-
     }
-
-  }
+}
